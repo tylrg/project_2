@@ -1,6 +1,14 @@
-all:
-	gcc -g -Wall -o driver.exe driver.c
-driver: driver.c
-	gcc -o -Wall -c driver driver.c
+CC=g++
+
+CFLAGS=-Wall -DDEBUG -g -std=c++14
+
+all: cache-sim
+
+
+predictors: cache-sim.o
+	$(CC) $(CFLAGS) cache-sim.o -o cache-sim
+predictors.o: cache-sim.h cache-sim.cpp
+	$(CC) $(CFLAGS) -c cache-sim.cpp -o cache-sim.o
+
 clean:
-		-rm driver.exe
+	rm cache-sim *.o

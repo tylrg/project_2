@@ -73,19 +73,21 @@ int main(int argc, char*argv[]){
 	//set-associative cache
 	for(int i=1;i<5;i++){
 		int way=(int)pow((double)2,(double)i);
-		int hcList=malloc(way-1*sizeof(char));
-		
+
+
 	}
 
 
 	//fully associative cache
-
+	int cacheSize=16000
+	//cache line size = 32bytes
+	int hcList=malloc(sizeof(char));
 
 
 	//set associative cache with no penalty on write miss
 	for(int i=1;i<5;i++){
 		int way=(int)pow((double)2,(double)i);
-
+		
 	}
 
 	//set associative cache with next-line prefetching
@@ -99,8 +101,6 @@ int main(int argc, char*argv[]){
 		int way=(int)pow((double)2,(double)i);
 
 	}
-
-
 
 	free(accesses);
 	free(ls_type_queue);
