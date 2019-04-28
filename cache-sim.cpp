@@ -2,9 +2,21 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <set>
 
 using namespace std;
 
+
+int vFind(vector<long> accesses, long key){
+	int firstFound=-1;
+	for(int f=0;f<accesses.size();f++){
+		if(accesses[f]==key){
+			firstFound=f;
+			break;
+		}
+	}
+	return firstFound;
+}
 string directMap(vector<long> accesses,int cacheSize);
 string setAssociative(vector<long> accesses,int way);
 string setFullyAssociativeLRU(vector<long> accesses);
@@ -12,6 +24,8 @@ string setFullyAssociativeHC(vector<long> accesses);
 string setAssociativeWriteMiss(vector<long> accesses, vector<int> ls_type_queue, int way);
 string setAssociativeNextLinePrefetch(vector<long> accesses,int way);
 string setAssociativePrefetchOnMiss(vector<long> accesses,int way);
+string setAssociativeLFU(vector<long> accesses,int way);
+
 
 int main(int argc, char*argv[]){
 	if(argc!=3){
@@ -71,12 +85,14 @@ int main(int argc, char*argv[]){
 	cout<<directMap(accesses,1*kb)<<directMap(accesses,4*kb)<<directMap(accesses,16*kb)<<directMap(accesses,32*kb)<<endl;
 	cout<<setAssociative(accesses,2)<<setAssociative(accesses,4)<<setAssociative(accesses,8)<<setAssociative(accesses,16)<<endl;
 	cout<<setFullyAssociativeLRU(accesses)<<endl;
-
+	cout<<setFullyAssociativeLRU(accesses)<<endl;//should be HC
 	cout<<setAssociativeWriteMiss(accesses,ls_type_queue,2)<<setAssociativeWriteMiss(accesses,ls_type_queue,4)<<setAssociativeWriteMiss(accesses,ls_type_queue,8)<<setAssociativeWriteMiss(accesses,ls_type_queue,16)<<endl;
 	cout<<setAssociativeNextLinePrefetch(accesses,2)<<setAssociativeNextLinePrefetch(accesses,4)<<setAssociativeNextLinePrefetch(accesses,8)<<setAssociativeNextLinePrefetch(accesses,16)<<endl;
 	cout<<setAssociativePrefetchOnMiss(accesses,2)<<setAssociativePrefetchOnMiss(accesses,4)<<setAssociativePrefetchOnMiss(accesses,8)<<setAssociativePrefetchOnMiss(accesses,16)<<endl;
+	cout<<setAssociativeLFU(accesses,2)<<setAssociativeLFU(accesses,4)<<setAssociativeLFU(accesses,8)<<setAssociativeLFU(accesses,16)<<endl;
 	return 0;
 }
+
 string directMap(vector<long> accesses,int cacheSize){
 	string output="";
 	int hit=0;
@@ -106,7 +122,7 @@ string directMap(vector<long> accesses,int cacheSize){
 	output.append(hitS);
 	output.append(",");
 	output.append(totalS);
-	output.append(";");
+	output.append("; ");
 	return output;
 }
 string setAssociative(vector<long> accesses,int way){
@@ -179,7 +195,7 @@ string setAssociative(vector<long> accesses,int way){
 	output.append(hitS);
 	output.append(",");
 	output.append(totalS);
-	output.append(";");
+	output.append("; ");
 	return output;
 }
 string setFullyAssociativeLRU(vector<long> accesses){
@@ -252,7 +268,7 @@ string setFullyAssociativeLRU(vector<long> accesses){
 	output.append(hitS);
 	output.append(",");
 	output.append(totalS);
-	output.append(";");
+	output.append("; ");
 	return output;
 }
 /*string setFullyAssociativeHC(vector<long> accesses){
@@ -401,7 +417,7 @@ string setAssociativeWriteMiss(vector<long> accesses,vector<int> ls_type_queue,i
 	output.append(hitS);
 	output.append(",");
 	output.append(totalS);
-	output.append(";");
+	output.append("; ");
 	return output;
 }
 string setAssociativeNextLinePrefetch(vector<long> accesses,int way){
@@ -506,7 +522,7 @@ string setAssociativeNextLinePrefetch(vector<long> accesses,int way){
 	output.append(hitS);
 	output.append(",");
 	output.append(totalS);
-	output.append(";");
+	output.append("; ");
 	return output;
 }
 string setAssociativePrefetchOnMiss(vector<long> accesses,int way){
@@ -612,6 +628,68 @@ string setAssociativePrefetchOnMiss(vector<long> accesses,int way){
 	output.append(hitS);
 	output.append(",");
 	output.append(totalS);
-	output.append(";");
+	output.append("; ");
 	return output;
 }
+string setAssociativeLFU(vector<long> accesses,int way){
+	string output="";
+	int hit=0;
+	int miss=0;
+	int numEntries=(16*1024/32);
+	int numSets=numEntries/way;
+	long cache [numEntries/way][way];
+ 	int lfu [numEntries/way][way];
+	for(int c=0;c<numEntries/way;c++){
+		for(int k=0;k<way;k++){
+			cache[c][k]= 0;
+			lfu[c][k]=false;
+		}
+	}
+
+	for(unsigned int i=0;i<accesses.size();i++){
+		long instruction=accesses[i];
+		int tag=instruction>>5;
+		int setIndex=tag%numSets;m
+		int hFlag=0; //determines hit or miss
+		for(int w=0;w<way;w++){
+			if(cache[setIndex][w]==(32*tag)){
+				hit++;
+				hFlag=1;
+				lfu[setIndex][w]++;
+			}
+		}
+		//if miss
+		if(hFlag==0){
+			int fullFlag=1;
+			for(int m=0;m<way;m++){
+				if(cache[setIndex][m]==0){
+					cache[setIndex][m]=tag*32;
+					lfu[setIndex][m]=1;
+					fullFlag=0;
+					break;
+				}
+			}
+
+			//if victim selection is needed
+			if(fullFlag==1){
+				int vIndex=0;
+				for(int foo=0;foo<way;foo++){
+					if(lfu[setIndex][foo]<lfu[setIndex][vIndex]){vIndex=foo;}
+				}
+				cache[setIndex][vIndex]=tag*32;
+				lfu[setIndex][vIndex]=1;
+			}
+			miss++;
+		}
+	}
+
+	int total=hit+miss;
+	string hitS= to_string(hit);
+	string totalS=to_string(total);
+	output.append(hitS);
+	output.append(",");
+	output.append(totalS);
+	output.append("; ");
+	return output;
+}
+//int location= interator-vector.begin()
