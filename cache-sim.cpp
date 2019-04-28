@@ -6,17 +6,6 @@
 
 using namespace std;
 
-
-int vFind(vector<long> accesses, long key){
-	int firstFound=-1;
-	for(int f=0;f<accesses.size();f++){
-		if(accesses[f]==key){
-			firstFound=f;
-			break;
-		}
-	}
-	return firstFound;
-}
 string directMap(vector<long> accesses,int cacheSize);
 string setAssociative(vector<long> accesses,int way);
 string setFullyAssociativeLRU(vector<long> accesses);
@@ -649,7 +638,7 @@ string setAssociativeLFU(vector<long> accesses,int way){
 	for(unsigned int i=0;i<accesses.size();i++){
 		long instruction=accesses[i];
 		int tag=instruction>>5;
-		int setIndex=tag%numSets;m
+		int setIndex=tag%numSets;
 		int hFlag=0; //determines hit or miss
 		for(int w=0;w<way;w++){
 			if(cache[setIndex][w]==(32*tag)){
@@ -692,4 +681,3 @@ string setAssociativeLFU(vector<long> accesses,int way){
 	output.append("; ");
 	return output;
 }
-//int location= interator-vector.begin()
