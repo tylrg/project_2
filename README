@@ -1,0 +1,12 @@
+Tyler Gabriel
+tgabrie2
+
+What works: Everything but Hot-Cold bit replacement, including set level lfu
+What doesn't work: Hot-Cold bit replacement
+
+EXTRA CREDIT: I implemented a least frequently used algorithm on a set-level basis,
+while a broader scope would also work, in my tests, just keep track of the frequency within the set
+yielded better results than lru
+
+Link to LFU:
+https://en.wikipedia.org/wiki/Least_frequently_used

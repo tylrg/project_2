@@ -4,6 +4,8 @@
 #include <vector>
 #include <fstream>
 #include <set>
+#include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
